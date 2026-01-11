@@ -14,8 +14,9 @@ function Navbar() {
 
                 {/* Desktop Menu */}
                 <ul className="hidden md:flex gap-6">
-                    <li><Link to="/" className="hover:text-purple-300">Input Data</Link></li>
-                    <li><Link to="/tampilkan" className="hover:text-purple-300">Tampilkan Data</Link></li>
+                    <li><Link to="/" className="hover:text-purple-300 transition-colors">Dashboard</Link></li>
+                    <li><Link to="/input" className="hover:text-purple-300 transition-colors">Input Data</Link></li>
+                    <li><Link to="/tampilkan" className="hover:text-purple-300 transition-colors">Tampilkan Data</Link></li>
                 </ul>
 
                 {/* Mobile Button */}
@@ -27,7 +28,8 @@ function Navbar() {
             {/* Mobile Menu */}
             {open && (
                 <div className="md:hidden mt-4 flex flex-col gap-3 text-center">
-                    <Link to="/" onClick={() => setOpen(false)}>Input Data</Link>
+                    <Link to="/" onClick={() => setOpen(false)}>Dashboard</Link>
+                    <Link to="/input" onClick={() => setOpen(false)}>Input Data</Link>
                     <Link to="/tampilkan" onClick={() => setOpen(false)}>Tampilkan Data</Link>
                 </div>
             )}

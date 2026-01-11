@@ -12,6 +12,9 @@ function Tabel() {
     const [editMode, setEditMode] = useState(null);
     const [formEdit, setFormEdit] = useState({ npm: '', nama: '', kelas: '' });
 
+    const [showDelete, setShowDelete] = useState(false);
+    const [deleteId, setDeleteId] = useState(null);
+
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -29,10 +32,16 @@ function Tabel() {
         }
     };
 
-    const hapusData = async (id) => {
-        if (!window.confirm("Yakin hapus data?")) return;
-        await axios.post("http://localhost/pweb/server/delete.php", { id });
+    const hapusData = (id) => {
+        setDeleteId(id);
+        setShowDelete(true);
+    };
+
+    const confirmDelete = async () => {
+        await axios.post("http://localhost/pweb/server/delete.php", { id: deleteId });
         ambilData();
+        setShowDelete(false);
+        setDeleteId(null);
     };
 
     const mulaiEdit = (mhs) => {
@@ -59,23 +68,6 @@ function Tabel() {
         <div className="min-h-screen bg-linear-to-r from-purple-50 via-white to-blue-50 p-6">
             <div className="max-w-7xl mx-auto bg-white rounded-2xl shadow-xl border border-purple-100 p-6">
 
-                {/* Header */}
-                <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
-                    <h1 className="text-2xl font-bold flex items-center gap-2 text-purple-700">
-                        <Users /> Data Mahasiswa
-                    </h1>
-
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                        <input
-                            className="pl-10 pr-4 py-2 border rounded-xl focus:ring-2 focus:ring-purple-500"
-                            placeholder="Cari mahasiswa..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                    </div>
-                </div>
-
                 {/* Table */}
                 <div className="overflow-x-auto rounded-xl border border-gray-200">
                     <table className="w-full min-w-[900px] border-collapse">
@@ -88,100 +80,46 @@ function Tabel() {
                                 <th className="px-6 py-4 text-center text-sm font-semibold">Aksi</th>
                             </tr>
                         </thead>
-
                         <tbody className="divide-y divide-gray-100">
                             {filteredMahasiswa.map((mhs, i) => (
-                                <tr
-                                    key={mhs.npm}
-                                    className="hover:bg-purple-50 transition-colors"
-                                >
-                                    <td className="px-6 py-4 font-medium text-gray-700">
-                                        {i + 1}
+                                <tr key={mhs.npm} className="hover:bg-purple-50 transition-colors">
+                                    <td className="px-6 py-4">{i + 1}</td>
+                                    <td className="px-6 py-4">{mhs.npm}</td>
+                                    <td className="px-6 py-4">{mhs.nama}</td>
+                                    <td className="px-6 py-4">{mhs.kelas}</td>
+                                    <td className="px-6 py-4">
+                                        <div className="flex justify-center gap-2">
+                                            <button onClick={() => navigate(`/mahasiswa/${mhs.id}`)} className="px-4 py-2 bg-purple-500 text-white rounded-lg"><Eye size={16} /></button>
+                                            <button onClick={() => mulaiEdit(mhs)} className="px-4 py-2 bg-blue-500 text-white rounded-lg"><Edit2 size={16} /></button>
+                                            <button onClick={() => hapusData(mhs.id)} className="px-4 py-2 bg-red-500 text-white rounded-lg"><Trash2 size={16} /></button>
+                                        </div>
                                     </td>
-
-                                    {editMode === mhs.npm ? (
-                                        <>
-                                            <td className="px-6 py-4 font-mono text-sm">
-                                                {mhs.npm}
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <input
-                                                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
-                                                    value={formEdit.nama}
-                                                    onChange={(e) => setFormEdit({ ...formEdit, nama: e.target.value })}
-                                                />
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <input
-                                                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
-                                                    value={formEdit.kelas}
-                                                    onChange={(e) => setFormEdit({ ...formEdit, kelas: e.target.value })}
-                                                />
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="flex justify-center gap-2">
-                                                    <button
-                                                        onClick={simpanEdit}
-                                                        className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
-                                                    >
-                                                        <Save size={16} />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => setEditMode(null)}
-                                                        className="px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500"
-                                                    >
-                                                        <X size={16} />
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <td className="px-6 py-4 font-mono text-sm text-gray-700">
-                                                {mhs.npm}
-                                            </td>
-                                            <td className="px-6 py-4 text-gray-900 font-medium">
-                                                {mhs.nama}
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <span className="inline-flex px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-700">
-                                                    {mhs.kelas}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="flex justify-center gap-2">
-                                                    <button
-                                                        onClick={() => navigate(`/mahasiswa/${mhs.id}`)}
-                                                        className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600"
-                                                    >
-                                                        <Eye size={16} />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => mulaiEdit(mhs)}
-                                                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-                                                    >
-                                                        <Edit2 size={16} />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => hapusData(mhs.id)}
-                                                        className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
-                                                    >
-                                                        <Trash2 size={16} />
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </>
-                                    )}
                                 </tr>
                             ))}
                         </tbody>
                     </table>
                 </div>
 
-                {/* Footer */}
-                <div className="mt-4 text-sm text-gray-500 text-center">
-                    Total: {filteredMahasiswa.length} mahasiswa
-                </div>
+                {/* MODAL DELETE */}
+                {showDelete && (
+                    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+                        <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md">
+                            <div className="text-center space-y-4">
+                                <Trash2 className="mx-auto text-red-500" size={40} />
+                                <h2 className="text-xl font-bold">Hapus Data?</h2>
+                                <p className="text-gray-500">Data yang dihapus tidak bisa dikembalikan.</p>
+                                <div className="flex gap-3">
+                                    <button onClick={() => setShowDelete(false)} className="w-full border py-2 rounded-lg">
+                                        Batal
+                                    </button>
+                                    <button onClick={confirmDelete} className="w-full bg-red-500 text-white py-2 rounded-lg">
+                                        Hapus
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
             </div>
         </div>
